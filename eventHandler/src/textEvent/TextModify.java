@@ -11,6 +11,11 @@ import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.wb.swt.SWTResourceManager;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ *验证输入的文本是否有效：判断是否小写字母
+ * @author 11648
+ *
+ */
 public class TextModify {
 
 	protected Shell shell;
