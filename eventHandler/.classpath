@@ -14,5 +14,7 @@
 	<classpathentry kind="lib" path="D:/Program Files/eclipse/plugins/org.eclipse.ui.workbench_3.112.0.v20180906-1121.jar" sourcepath="D:/Program Files/eclipse/plugins/org.eclipse.ui.workbench.source_3.112.0.v20180906-1121.jar"/>
 	<classpathentry kind="lib" path="D:/Program Files/eclipse/plugins/com.ibm.icu_62.1.0.v20180727-1652.jar" sourcepath="D:/Program Files/eclipse/plugins/com.ibm.icu.source_62.1.0.v20180727-1652.jar"/>
 	<classpathentry kind="lib" path="D:/Program Files/eclipse/plugins/org.eclipse.ui.forms_3.7.300.v20180828-1350.jar" sourcepath="D:/Program Files/eclipse/plugins/org.eclipse.ui.forms.source_3.7.300.v20180828-1350.jar"/>
+	<classpathentry kind="lib" path="libs/jna-5.5.0.jar" sourcepath="libs/jna-5.5.0.jar"/>
+	<classpathentry kind="lib" path="libs/jna-platform-5.5.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
