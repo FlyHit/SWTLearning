@@ -68,17 +68,15 @@ public class LinkExample {
 			@Override
 			public void handleEvent(Event event) {
 				try {
-					Link l = (Link) event.widget;
-					String[] splitString = l.getText().split("\"", 3);  // 分割提取链接
+//					Link l = (Link) event.widget;
+//					String[] splitString = l.getText().split("\"", 3);  // 分割提取链接
 					/*
 					 * Runtime.getRuntime:获取当前Java程序的runtime
 					 * exec():执行字符串类型的命令
+					 * event.text:链接文本的链接地址，即href的内容（若有）
 					 * 这里命令是使用默认浏览器打开链接
 					 */
-					Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + splitString[1]);
-					for (String s : splitString) {
-						System.out.println(s);
-					}
+					Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + event.text);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
