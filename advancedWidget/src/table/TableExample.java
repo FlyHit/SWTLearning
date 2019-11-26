@@ -1,4 +1,4 @@
-package advancedWidget;
+package table;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
