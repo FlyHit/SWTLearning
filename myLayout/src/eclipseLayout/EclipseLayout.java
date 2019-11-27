@@ -1,15 +1,18 @@
 package eclipseLayout;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
-import swt.SWTResourceManager;
 
 public class EclipseLayout {
     private Shell shell;
+    Display display;
     private FillLayout verticalLayout;
     private FillLayout horizonLayout;
     //region 菜单栏变量
@@ -35,18 +38,18 @@ public class EclipseLayout {
     private Composite sash1Cpst1;
     private Composite sash1Cpst2;
     private SashForm sashForm2;
-    private Composite sash2Cpst1;
-    private Composite sash2Cpst2;
+    private CTabFolder cTF_1;
+    private CTabFolder cTF_2;
     private SashForm sashForm3;
     private Composite sash3Cpst1;
-    private Composite sash3Cpst2;
+    private CTabFolder cTF_3;
     private SashForm sashForm4;
-    private Composite sash4Cpst1;
+    private CTabFolder cTF_4;
     private Composite sash4Cpst2;
     private SashForm sashForm5;
-    private Composite sash5Cpst1;
-    private Composite sash5Cpst2;
-    private Composite sash5Cpst3;
+    private CTabFolder cTF_5;
+    private CTabFolder cTF_6;
+    private CTabFolder cTF_7;
 
     /**
      * 加载应用
@@ -66,7 +69,7 @@ public class EclipseLayout {
      * 打开窗口
      */
     private void open() {
-        Display display = Display.getDefault();
+        display = Display.getDefault();
         createContents();
         shell.open();
         shell.layout();
@@ -103,34 +106,33 @@ public class EclipseLayout {
         topBarVF.setContent(sashForm1);
 
         sashForm2 = new SashForm(sash1Cpst1, SWT.VERTICAL | SWT.BORDER);
-        sash2Cpst1 = new Composite(sashForm2, SWT.NONE);
-        sash2Cpst1.setBackground(SWTResourceManager.getColor(SWT.COLOR_GREEN));
-        sash2Cpst2 = new Composite(sashForm2, SWT.NONE);
-        sash2Cpst2.setBackground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
+        cTF_1 = createCTabFolder(sashForm2);
+        cTF_1.setBackground(new Color(display, 239, 83, 80));
+        cTF_2 = createCTabFolder(sashForm2);
+        cTF_2.setBackground(new Color(display, 66, 165, 245));
         sashForm2.setWeights(new int[]{70, 30});
 
         sashForm3 = new SashForm(sash1Cpst2, SWT.VERTICAL | SWT.BORDER);
         sash3Cpst1 = new Composite(sashForm3, SWT.NONE);
         sash3Cpst1.setLayout(new FillLayout());
-        sash3Cpst1.setBackground(SWTResourceManager.getColor(SWT.COLOR_RED));
-        sash3Cpst2 = new Composite(sashForm3, SWT.NONE);
-        sash3Cpst2.setBackground(SWTResourceManager.getColor(SWT.COLOR_YELLOW));
+        cTF_3 = createCTabFolder(sashForm3);
+        cTF_3.setBackground(new Color(display, 255, 238, 88));
         sashForm3.setWeights(new int[]{80, 20});
 
         sashForm4 = new SashForm(sash3Cpst1, SWT.HORIZONTAL | SWT.BORDER);
-        sash4Cpst1 = new Composite(sashForm4, SWT.NONE);
-        sash4Cpst1.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_GREEN));
+        cTF_4 = createCTabFolder(sashForm4);
+        cTF_4.setBackground(new Color(display, 255, 167, 38));
         sash4Cpst2 = new Composite(sashForm4, SWT.NONE);
         sash4Cpst2.setLayout(new FillLayout());
         sashForm4.setWeights(new int[]{70, 30});
 
         sashForm5 = new SashForm(sash4Cpst2, SWT.VERTICAL | SWT.BORDER);
-        sash5Cpst1 = new Composite(sashForm5, SWT.NONE);
-        sash5Cpst1.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_BLUE));
-        sash5Cpst2 = new Composite(sashForm5, SWT.NONE);
-        sash5Cpst2.setBackground(SWTResourceManager.getColor(SWT.COLOR_RED));
-        sash5Cpst3 = new Composite(sashForm5, SWT.NONE);
-        sash5Cpst3.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_YELLOW));
+        cTF_5 = createCTabFolder(sashForm5);
+        cTF_5.setBackground(new Color(display, 102, 187, 106));
+        cTF_6 = createCTabFolder(sashForm5);
+        cTF_6.setBackground(new Color(display, 38, 166, 154));
+        cTF_7 = createCTabFolder(sashForm5);
+        cTF_7.setBackground(new Color(display, 38, 198, 218));
         sashForm5.setWeights(new int[]{30, 30, 40});
     }
 
@@ -183,5 +185,27 @@ public class EclipseLayout {
         toolItem3.setText("tool3");
         toolItem4 = new ToolItem(rightTool, SWT.NONE);
         toolItem4.setText("tool4");
+    }
+
+    /**
+     * 创建标签卡
+     *
+     * @param parent 标签卡的parent
+     * @return 创建的标签卡
+     */
+    private CTabFolder createCTabFolder(Composite parent) {
+        CTabFolder cTabFolder = new CTabFolder(parent, SWT.BORDER);
+        cTabFolder.setSimple(false);
+        cTabFolder.setMinimizeVisible(true);
+        cTabFolder.setMaximizeVisible(true);
+
+        for (int i = 0; i < 3; i++) {
+            CTabItem cTabItem = new CTabItem(cTabFolder, SWT.CLOSE);
+            cTabItem.setText("Tab " + i);
+            Text text = new Text(cTabFolder, SWT.NONE);
+            cTabItem.setControl(text);
+        }
+
+        return cTabFolder;
     }
 }
