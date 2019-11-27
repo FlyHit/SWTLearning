@@ -6,6 +6,8 @@
       <module fileurl="file://$PROJECT_DIR$/advancedWidget/advancedWidget.iml" filepath="$PROJECT_DIR$/advancedWidget/advancedWidget.iml" />
       <module fileurl="file://$PROJECT_DIR$/eventHandler/eventHandler.iml" filepath="$PROJECT_DIR$/eventHandler/eventHandler.iml" />
       <module fileurl="file://$PROJECT_DIR$/myFirstSWT/myFirstSWT.iml" filepath="$PROJECT_DIR$/myFirstSWT/myFirstSWT.iml" />
+      <module fileurl="file://$PROJECT_DIR$/myLayout/myLayout.iml" filepath="$PROJECT_DIR$/myLayout/myLayout.iml" />
+      <module fileurl="file://$PROJECT_DIR$/test/test.iml" filepath="$PROJECT_DIR$/test/test.iml" />
     </modules>
   </component>
 </project>
