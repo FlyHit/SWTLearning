@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/SWTWidget/SWTWidget.iml" filepath="$PROJECT_DIR$/SWTWidget/SWTWidget.iml" />
+      <module fileurl="file://$PROJECT_DIR$/advancedWidget/advancedWidget.iml" filepath="$PROJECT_DIR$/advancedWidget/advancedWidget.iml" />
+      <module fileurl="file://$PROJECT_DIR$/eventHandler/eventHandler.iml" filepath="$PROJECT_DIR$/eventHandler/eventHandler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/myFirstSWT/myFirstSWT.iml" filepath="$PROJECT_DIR$/myFirstSWT/myFirstSWT.iml" />
+    </modules>
+  </component>
+</project>
