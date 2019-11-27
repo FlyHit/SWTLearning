@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SWTWidget/SWTWidget.iml" filepath="$PROJECT_DIR$/SWTWidget/SWTWidget.iml" />
       <module fileurl="file://$PROJECT_DIR$/advancedWidget/advancedWidget.iml" filepath="$PROJECT_DIR$/advancedWidget/advancedWidget.iml" />
+      <module fileurl="file://$PROJECT_DIR$/composite/composite.iml" filepath="$PROJECT_DIR$/composite/composite.iml" />
       <module fileurl="file://$PROJECT_DIR$/eventHandler/eventHandler.iml" filepath="$PROJECT_DIR$/eventHandler/eventHandler.iml" />
       <module fileurl="file://$PROJECT_DIR$/myFirstSWT/myFirstSWT.iml" filepath="$PROJECT_DIR$/myFirstSWT/myFirstSWT.iml" />
       <module fileurl="file://$PROJECT_DIR$/myLayout/myLayout.iml" filepath="$PROJECT_DIR$/myLayout/myLayout.iml" />
