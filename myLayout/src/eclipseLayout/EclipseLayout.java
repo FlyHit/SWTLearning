@@ -12,8 +12,8 @@ import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 
 /**
- * 完成窗体大致的布局，包括菜单、顶部栏、中间多个可调整的窗口及两侧可以容纳
- * 最小化后的窗口图标的工具栏，但是最小化最大化功能存在bug，需要重写
+ * 添加了恢复及最小化功能，最小化的时候侧栏会出现以容纳最小化后的窗口
+ * 目前工具栏的按钮只占位，功能未实现
  */
 public class EclipseLayout {
     private Shell shell;
@@ -59,7 +59,8 @@ public class EclipseLayout {
     private ToolItem cTF_7_Item;
     //endregion
 
-    //region middle sashForm
+    //region middle composite
+    private Composite middleCpst;
     private SashForm sashForm1;
     private SashForm sashForm2;
     private CTabFolder cTF_1;
@@ -155,7 +156,7 @@ public class EclipseLayout {
         viewForm_1 = new ViewForm(shell, SWT.NONE);
         viewForm_1.setTopCenterSeparate(true);
         createTopBar();
-        createCpst();
+        createContentCpst();
         viewForm_1.setContent(contentCpst);
     }
 
@@ -189,13 +190,13 @@ public class EclipseLayout {
     /**
      * 创建VF1的content：contentCpst
      */
-    private void createCpst() {
+    private void createContentCpst() {
         contentCpst = new Composite(viewForm_1, SWT.NONE);
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 3;
         contentCpst.setLayout(gridLayout);
         createLToolBar();
-        createSashForm();
+        createMiddleCpst();
         createRToolBar();
     }
 
@@ -232,9 +233,14 @@ public class EclipseLayout {
         cTF_7_Item.setImage(image7);
     }
 
-    private void createSashForm() {
+    private void createMiddleCpst() {
         //region SashForm1
-        sashForm1 = new SashForm(contentCpst, SWT.HORIZONTAL);
+        middleCpst = new Composite(contentCpst, SWT.NONE);
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.numColumns = 1;
+        middleCpst.setLayout(gridLayout);
+        middleCpst.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        sashForm1 = new SashForm(middleCpst, SWT.HORIZONTAL);
         sashForm1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         //region SashForm2
         sashForm2 = new SashForm(sashForm1, SWT.VERTICAL);
@@ -318,26 +324,22 @@ public class EclipseLayout {
 
     class CTFAdapter extends CTabFolder2Adapter {
         private CTabFolder cTabFolder;
-        private SashForm sashForm;
 
         public CTFAdapter(CTabFolder c) {
             this.cTabFolder = c;
-            this.sashForm = (SashForm) c.getParent();
         }
 
         @Override
         public void minimize(CTabFolderEvent event) {
             cTabFolder.setMinimized(true);
-
-            int[] weights = sashForm.getWeights();
-            int i = getIndex(cTabFolder);
-            if ((i != weights.length - 1)) {
-                weights[i + 1] += weights[i];
+            setMin(cTabFolder);
+            if (cTabFolder.equals(cTF_1) || cTabFolder.equals(cTF_2)) {
+                lToolBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+                contentCpst.layout();
             } else {
-                weights[i - 1] += weights[i];
+                rToolBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+                contentCpst.layout();
             }
-            weights[i] = 0;
-            sashForm.setWeights(weights);
         }
 
         @Override
@@ -348,10 +350,9 @@ public class EclipseLayout {
 
         @Override
         public void restore(CTabFolderEvent event) {
-            cTF_1.setMinimized(false);
-            cTF_1.setMaximized(false);
-            sashForm1.setWeights(sf1Weight);
-            sashForm2.setWeights(sf2Weight);
+            cTabFolder.setMaximized(false);
+            cTabFolder.setMinimized(false);
+            restore(cTabFolder);
         }
 
         /**
@@ -386,6 +387,64 @@ public class EclipseLayout {
             s.setMaximizedControl(max);
             if (!s.getParent().equals(contentCpst)) {
                 setMax(s);
+            }
+        }
+
+        /**
+         * 恢复布局
+         *
+         * @param c
+         */
+        private void restore(Control c) {
+            SashForm s = (SashForm) c.getParent();
+            s.setMaximizedControl(null);
+            if (!s.getParent().equals(contentCpst)) {
+                restore(s);
+            }
+        }
+
+        /**
+         * 将标签页最小化
+         *
+         * @param min 最小化的标签页
+         */
+        private void setMin(Control min) {
+            boolean isAllMin = true;
+            SashForm s = (SashForm) min.getParent();
+            int[] weights = s.getWeights();
+            int i = getIndex(min);
+            for (int j = i + 1; j < weights.length; j++) {
+                if (weights[j] != 0) {
+                    weights[j] += weights[i];
+                    break;
+                }
+            }
+
+            if (i == weights.length - 1) {
+                for (int j = i - 1; j > 0; j--) {
+                    if (weights[j] != 0) {
+                        weights[j] += weights[i];
+                        break;
+                    }
+                }
+            }
+            weights[i] = 0;
+
+            for (int weight : weights) {
+                if (weight != 0) {
+                    isAllMin = false;
+                }
+            }
+
+            if (!isAllMin) {
+                s.setWeights(weights);
+            } else {
+                if (!s.getParent().equals(middleCpst)) {
+                    setMin(s);
+                } else {
+                    s.setLayoutData(new GridData(0, 0));
+                    middleCpst.layout();
+                }
             }
         }
     }
