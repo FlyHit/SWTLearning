@@ -83,7 +83,6 @@ public class EclipseLayout {
     private int[] sf5Weight = new int[]{30, 30, 40};
     //endregion
 
-
     /**
      * 加载应用
      *
@@ -242,13 +241,7 @@ public class EclipseLayout {
         sashForm2.setLayout(new FillLayout());
         cTF_1 = createCTabFolder(sashForm2);
         cTF_1.setBackground(new Color(display, 239, 83, 80));
-        cTF_1.addCTabFolder2Listener(new CTabFolder2Adapter() {
-            @Override
-            public void maximize(CTabFolderEvent event) {
-                System.out.println(1);
-                System.out.println("e" + sashForm3.getChildren());
-            }
-        });
+        cTF_1.addCTabFolder2Listener(new CTFAdapter(cTF_1));
         cTF_2 = createCTabFolder(sashForm2);
         cTF_2.setBackground(new Color(display, 66, 165, 245));
         cTF_2.addCTabFolder2Listener(new CTFAdapter(cTF_2));
@@ -325,15 +318,11 @@ public class EclipseLayout {
 
     class CTFAdapter extends CTabFolder2Adapter {
         private CTabFolder cTabFolder;
-        private CTabFolder cTabFolder1;
         private SashForm sashForm;
-//        private int[] weights;
 
         public CTFAdapter(CTabFolder c) {
             this.cTabFolder = c;
-            this.cTabFolder1 = c;
             this.sashForm = (SashForm) c.getParent();
-//            this.weights=sashForm.getWeights();
         }
 
         @Override
@@ -353,9 +342,8 @@ public class EclipseLayout {
 
         @Override
         public void maximize(CTabFolderEvent event) {
-//            cTabFolder.setMaximized(true);
-//            setMax(cTabFolder);
-            System.out.println("e" + sashForm3.getChildren().length);
+            cTabFolder.setMaximized(true);
+            setMax(cTabFolder);
         }
 
         @Override
@@ -364,56 +352,41 @@ public class EclipseLayout {
             cTF_1.setMaximized(false);
             sashForm1.setWeights(sf1Weight);
             sashForm2.setWeights(sf2Weight);
-            Control[] control = sashForm1.getChildren();
-            for (Control c : control) {
-                if (c instanceof SashForm) {
-                    System.out.println(c.getClass());
-                }
-            }
         }
 
         /**
-         * @param c
+         * 获取child在parent的序号
+         *
+         * @param child 要获取序号的child
+         * @return child的序号
          */
-        private void setMax(Control c) {
-            SashForm sashForm = (SashForm) c.getParent();
-            int i = getIndex(sashForm);
-//            System.out.println(i);
-            int[] weights = new int[sashForm.getWeights().length];
-            weights[i] = 100;
-            for (int weight : weights) {
-//                System.out.println(weight);
-            }
-            sashForm.setWeights(weights);
-            if (cTF_1 == cTF_2) {
-//                System.out.println("yes");
-            }
-//            if (sashForm.getParent().equals(contentCpst)) {
-//                return;
-//            }
-//            setMax(sashForm);
-        }
-    }
+        private int getIndex(Control child) {
+            Composite c = child.getParent();
 
-    /**
-     * 获取对象在父级的序号
-     *
-     * @param child
-     * @return
-     */
-    private int getIndex(Control child) {
-        Composite c = child.getParent();
-        System.out.println("e" + sashForm3.getChildren().length);
-        int index = 0;
-        Control[] control = c.getChildren();
-//            System.out.println(c.getChildren().length);
-        for (Control control1 : control) {
-            if (control1 == child) {
-                break;
+            int index = 0;
+            Control[] control = c.getChildren();
+
+            for (Control control1 : control) {
+                if (control1.equals(child)) {
+                    break;
+                }
+                index++;
             }
-            index++;
+
+            return index;
         }
 
-        return index;
+        /**
+         * 将标签页最大化：这里传入控件的parent必须是SashForm
+         *
+         * @param max 最大化的标签页
+         */
+        private void setMax(Control max) {
+            SashForm s = (SashForm) max.getParent();
+            s.setMaximizedControl(max);
+            if (!s.getParent().equals(contentCpst)) {
+                setMax(s);
+            }
+        }
     }
 }
