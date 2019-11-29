@@ -2,19 +2,18 @@ package eclipseLayout;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.*;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 
-/**
- * 添加了恢复及最小化功能，最小化的时候侧栏会出现以容纳最小化后的窗口
- * 目前工具栏的按钮只占位，功能未实现
- */
 public class EclipseLayout {
     private Shell shell;
     private Display display;
@@ -44,20 +43,8 @@ public class EclipseLayout {
 
     //region content-VF1:contentCpst
     private Composite contentCpst;
-    //region left toolBar
     private ToolBar lToolBar;
-    private ToolItem cTF_1_Item;
-    private ToolItem cTF_2_Item;
-    //endregion
-
-    //region right toolBar
     private ToolBar rToolBar;
-    private ToolItem cTF_3_Item;
-    private ToolItem cTF_4_Item;
-    private ToolItem cTF_5_Item;
-    private ToolItem cTF_6_Item;
-    private ToolItem cTF_7_Item;
-    //endregion
 
     //region middle composite
     private Composite middleCpst;
@@ -83,6 +70,8 @@ public class EclipseLayout {
     private int[] sf4Weight = new int[]{70, 30};
     private int[] sf5Weight = new int[]{30, 30, 40};
     //endregion
+    private GridData lGridData;
+    private GridData rGridData;
 
     /**
      * 加载应用
@@ -169,6 +158,9 @@ public class EclipseLayout {
         viewForm_1.setTopRight(toolCpst);
     }
 
+    /**
+     * 创建工具栏
+     */
     private void createToolBar() {
         tlToolBar_1 = new ToolBar(viewForm_1, SWT.FLAT);
         toolItem1 = new ToolItem(tlToolBar_1, SWT.NONE);
@@ -194,61 +186,75 @@ public class EclipseLayout {
         contentCpst = new Composite(viewForm_1, SWT.NONE);
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 3;
+        gridLayout.marginWidth = 0;
+        gridLayout.marginHeight = 0;
+        gridLayout.horizontalSpacing = 0;
         contentCpst.setLayout(gridLayout);
         createLToolBar();
         createMiddleCpst();
         createRToolBar();
     }
 
+    /**
+     * 创建左侧边栏
+     */
     private void createLToolBar() {
         lToolBar = new ToolBar(contentCpst, SWT.VERTICAL);
-        lToolBar.setLayoutData(new GridData(0, 0));
-
-        Image image1 = drawImage(new Color(display, 239, 83, 80));
-        Image image2 = drawImage(new Color(display, 66, 165, 245));
-        cTF_1_Item = new ToolItem(lToolBar, SWT.PUSH);
-        cTF_1_Item.setImage(image1);
-        cTF_2_Item = new ToolItem(lToolBar, SWT.PUSH);
-        cTF_2_Item.setImage(image2);
+        lGridData = new GridData(SWT.FILL, SWT.FILL, false, true);
+        lToolBar.setLayoutData(lGridData);
+//        隐藏侧边栏
+        lToolBar.setVisible(false);
+        lGridData.exclude = true;
     }
 
+    /**
+     * 创建右侧边栏
+     */
     private void createRToolBar() {
         rToolBar = new ToolBar(contentCpst, SWT.VERTICAL);
-        rToolBar.setLayoutData(new GridData(0, 0));
-
-        Image image3 = drawImage(new Color(display, 255, 238, 88));
-        Image image4 = drawImage(new Color(display, 255, 167, 38));
-        Image image5 = drawImage(new Color(display, 102, 187, 106));
-        Image image6 = drawImage(new Color(display, 38, 166, 154));
-        Image image7 = drawImage(new Color(display, 38, 198, 218));
-        cTF_3_Item = new ToolItem(rToolBar, SWT.PUSH);
-        cTF_3_Item.setImage(image3);
-        cTF_4_Item = new ToolItem(rToolBar, SWT.PUSH);
-        cTF_4_Item.setImage(image4);
-        cTF_5_Item = new ToolItem(rToolBar, SWT.PUSH);
-        cTF_5_Item.setImage(image5);
-        cTF_6_Item = new ToolItem(rToolBar, SWT.PUSH);
-        cTF_6_Item.setImage(image6);
-        cTF_7_Item = new ToolItem(rToolBar, SWT.PUSH);
-        cTF_7_Item.setImage(image7);
+        rGridData = new GridData(SWT.FILL, SWT.FILL, false, true);
+        rToolBar.setLayoutData(rGridData);
+//        隐藏侧边栏
+        rToolBar.setVisible(false);
+        rGridData.exclude = true;
     }
 
+    /**
+     * 创建工具按钮
+     *
+     * @param t    按钮所在的工具栏
+     * @param name 按钮名称
+     * @param i    按钮的图片
+     */
+    private void createToolItem(ToolBar t, String name, Image i) {
+        ToolItem toolItem = new ToolItem(t, SWT.PUSH | SWT.BORDER);
+        toolItem.setImage(i);
+        toolItem.addSelectionListener(new TabSelection());
+        toolItem.setData("name", name);
+    }
+
+    /**
+     * 创建中间的面板
+     */
     private void createMiddleCpst() {
-        //region SashForm1
         middleCpst = new Composite(contentCpst, SWT.NONE);
         GridLayout gridLayout = new GridLayout();
-        gridLayout.numColumns = 1;
+        gridLayout.marginWidth = 0;
+        gridLayout.marginHeight = 0;
+        gridLayout.horizontalSpacing = 0;
         middleCpst.setLayout(gridLayout);
-        middleCpst.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+        middleCpst.setLayoutData(gridData);
+        //region SashForm1
         sashForm1 = new SashForm(middleCpst, SWT.HORIZONTAL);
         sashForm1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         //region SashForm2
         sashForm2 = new SashForm(sashForm1, SWT.VERTICAL);
         sashForm2.setLayout(new FillLayout());
-        cTF_1 = createCTabFolder(sashForm2);
+        cTF_1 = createCTabFolder(sashForm2, "1");
         cTF_1.setBackground(new Color(display, 239, 83, 80));
         cTF_1.addCTabFolder2Listener(new CTFAdapter(cTF_1));
-        cTF_2 = createCTabFolder(sashForm2);
+        cTF_2 = createCTabFolder(sashForm2, "2");
         cTF_2.setBackground(new Color(display, 66, 165, 245));
         cTF_2.addCTabFolder2Listener(new CTFAdapter(cTF_2));
         sashForm2.setWeights(sf2Weight);
@@ -259,24 +265,24 @@ public class EclipseLayout {
         //region SashForm4
         sashForm4 = new SashForm(sashForm3, SWT.HORIZONTAL);
         sashForm4.setLayout(new FillLayout());
-        cTF_4 = createCTabFolder(sashForm4);
+        cTF_4 = createCTabFolder(sashForm4, "4");
         cTF_4.setBackground(new Color(display, 255, 167, 38));
         cTF_4.addCTabFolder2Listener(new CTFAdapter(cTF_4));
         sashForm5 = new SashForm(sashForm4, SWT.VERTICAL);
         sashForm5.setLayout(new FillLayout());
-        cTF_5 = createCTabFolder(sashForm5);
+        cTF_5 = createCTabFolder(sashForm5, "5");
         cTF_5.setBackground(new Color(display, 102, 187, 106));
         cTF_5.addCTabFolder2Listener(new CTFAdapter(cTF_5));
-        cTF_6 = createCTabFolder(sashForm5);
+        cTF_6 = createCTabFolder(sashForm5, "6");
         cTF_6.setBackground(new Color(display, 38, 166, 154));
         cTF_6.addCTabFolder2Listener(new CTFAdapter(cTF_6));
-        cTF_7 = createCTabFolder(sashForm5);
+        cTF_7 = createCTabFolder(sashForm5, "7");
         cTF_7.setBackground(new Color(display, 38, 198, 218));
         cTF_7.addCTabFolder2Listener(new CTFAdapter(cTF_7));
         sashForm5.setWeights(sf5Weight);
         sashForm4.setWeights(sf4Weight);
         //endregion
-        cTF_3 = createCTabFolder(sashForm3);
+        cTF_3 = createCTabFolder(sashForm3, "3");
         cTF_3.setBackground(new Color(display, 255, 238, 88));
         cTF_3.addCTabFolder2Listener(new CTFAdapter(cTF_3));
         sashForm3.setWeights(sf3Weight);
@@ -289,10 +295,12 @@ public class EclipseLayout {
      * 创建标签卡
      *
      * @param parent 标签卡的parent
+     * @param name   标签卡的名称
      * @return 创建的标签卡
      */
-    private CTabFolder createCTabFolder(Composite parent) {
+    private CTabFolder createCTabFolder(Composite parent, String name) {
         CTabFolder cTabFolder = new CTabFolder(parent, SWT.NONE);
+        cTabFolder.setData("name", name);
         cTabFolder.setSimple(false);
         cTabFolder.setMinimizeVisible(true);
         cTabFolder.setMaximizeVisible(true);
@@ -333,11 +341,43 @@ public class EclipseLayout {
         public void minimize(CTabFolderEvent event) {
             cTabFolder.setMinimized(true);
             setMin(cTabFolder);
-            if (cTabFolder.equals(cTF_1) || cTabFolder.equals(cTF_2)) {
-                lToolBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+            String name = (String) cTabFolder.getData("name");
+            if (name == "1" || name == "2") {
+                switch (name) {
+                    case "1":
+                        createToolItem(lToolBar, name, getImage("1"));
+                        break;
+                    case "2":
+                        createToolItem(lToolBar, name, getImage("2"));
+                        break;
+                    default:
+                        break;
+                }
+                lToolBar.setVisible(true);
+                lGridData.exclude = false;
                 contentCpst.layout();
             } else {
-                rToolBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+                switch (name) {
+                    case "3":
+                        createToolItem(rToolBar, name, getImage("3"));
+                        break;
+                    case "4":
+                        createToolItem(rToolBar, name, getImage("4"));
+                        break;
+                    case "5":
+                        createToolItem(rToolBar, name, getImage("5"));
+                        break;
+                    case "6":
+                        createToolItem(rToolBar, name, getImage("6"));
+                        break;
+                    case "7":
+                        createToolItem(rToolBar, name, getImage("7"));
+                        break;
+                    default:
+                        break;
+                }
+                rToolBar.setVisible(true);
+                rGridData.exclude = false;
                 contentCpst.layout();
             }
         }
@@ -385,21 +425,8 @@ public class EclipseLayout {
         private void setMax(Control max) {
             SashForm s = (SashForm) max.getParent();
             s.setMaximizedControl(max);
-            if (!s.getParent().equals(contentCpst)) {
+            if (!s.getParent().equals(middleCpst)) {
                 setMax(s);
-            }
-        }
-
-        /**
-         * 恢复布局
-         *
-         * @param c
-         */
-        private void restore(Control c) {
-            SashForm s = (SashForm) c.getParent();
-            s.setMaximizedControl(null);
-            if (!s.getParent().equals(contentCpst)) {
-                restore(s);
             }
         }
 
@@ -447,5 +474,97 @@ public class EclipseLayout {
                 }
             }
         }
+
+        /**
+         * 恢复布局
+         *
+         * @param c
+         */
+        private void restore(Control c) {
+            SashForm s = (SashForm) c.getParent();
+            s.setMaximizedControl(null);
+            if (!s.getParent().equals(middleCpst)) {
+                restore(s);
+            }
+        }
+    }
+
+    class TabSelection extends SelectionAdapter {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+            ToolItem t = (ToolItem) e.widget;
+            CTabFolder c = null;
+
+            switch ((String) t.getData("name")) {
+                case "1":
+                    c = cTF_1;
+                    break;
+                case "2":
+                    c = cTF_2;
+                    break;
+                case "3":
+                    c = cTF_3;
+                    break;
+                case "4":
+                    c = cTF_4;
+                    break;
+                case "5":
+                    c = cTF_5;
+                    break;
+                case "6":
+                    c = cTF_6;
+                    break;
+                case "7":
+                    c = cTF_7;
+                    break;
+                default:
+                    break;
+            }
+            c.setMinimized(false);
+            c.setMaximized(false);
+            t.dispose();
+        }
+    }
+
+    /**
+     * 获取图片
+     *
+     * @param name 图片名
+     * @return 和名字对应的图片
+     */
+    private Image getImage(String name) {
+        final RGB color1 = new RGB(239, 83, 80);
+        final RGB color2 = new RGB(66, 165, 245);
+        final RGB color3 = new RGB(255, 238, 88);
+        final RGB color4 = new RGB(255, 167, 38);
+        final RGB color5 = new RGB(102, 187, 106);
+        final RGB color6 = new RGB(38, 166, 154);
+        final RGB color7 = new RGB(38, 198, 218);
+        RGB rgb = null;
+        switch (name) {
+            case "1":
+                rgb = color1;
+                break;
+            case "2":
+                rgb = color2;
+                break;
+            case "3":
+                rgb = color3;
+                break;
+            case "4":
+                rgb = color4;
+                break;
+            case "5":
+                rgb = color5;
+                break;
+            case "6":
+                rgb = color6;
+                break;
+            case "7":
+                rgb = color7;
+                break;
+        }
+
+        return drawImage(new Color(display, rgb));
     }
 }
