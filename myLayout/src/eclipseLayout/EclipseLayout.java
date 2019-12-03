@@ -16,10 +16,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 
-/**
- *侧边栏没有标签页时隐藏&点击按钮恢复标签页
- * 点击按钮存在bug，缩小一个恢复一个，多了就有问题了
- */
 public class EclipseLayout {
     private Shell shell;
     private Display display;
@@ -70,7 +66,7 @@ public class EclipseLayout {
     //endregion
     //endregion
     //region SashForm宽度数组
-    private int[] sf1Weight = new int[]{20, 70};
+    private int[] sf1Weight = new int[]{20, 80};
     private int[] sf2Weight = new int[]{70, 30};
     private int[] sf3Weight = new int[]{80, 20};
     private int[] sf4Weight = new int[]{70, 30};
@@ -78,6 +74,7 @@ public class EclipseLayout {
     //endregion
     private GridData lGridData;
     private GridData rGridData;
+    private GridData sf1GridData;
 
     /**
      * 加载应用
@@ -252,11 +249,14 @@ public class EclipseLayout {
         GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
         middleCpst.setLayoutData(gridData);
         //region SashForm1
+        sf1GridData = new GridData(SWT.FILL, SWT.FILL, true, true);
         sashForm1 = new SashForm(middleCpst, SWT.HORIZONTAL);
-        sashForm1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        sashForm1.setLayoutData(sf1GridData);
+        sashForm1.setData("isMin", "false");
         //region SashForm2
         sashForm2 = new SashForm(sashForm1, SWT.VERTICAL);
         sashForm2.setLayout(new FillLayout());
+        sashForm2.setData("isMin", "false");
         cTF_1 = createCTabFolder(sashForm2, "1");
         cTF_1.setBackground(new Color(display, 239, 83, 80));
         cTF_1.addCTabFolder2Listener(new CTFAdapter(cTF_1));
@@ -269,14 +269,17 @@ public class EclipseLayout {
         //region SashForm3
         sashForm3 = new SashForm(sashForm1, SWT.VERTICAL);
         sashForm3.setLayout(new FillLayout());
+        sashForm3.setData("isMin", "false");
         //region SashForm4
         sashForm4 = new SashForm(sashForm3, SWT.HORIZONTAL);
         sashForm4.setLayout(new FillLayout());
+        sashForm4.setData("isMin", "false");
         cTF_4 = createCTabFolder(sashForm4, "4");
         cTF_4.setBackground(new Color(display, 255, 167, 38));
         cTF_4.addCTabFolder2Listener(new CTFAdapter(cTF_4));
         sashForm5 = new SashForm(sashForm4, SWT.VERTICAL);
         sashForm5.setLayout(new FillLayout());
+        sashForm5.setData("isMin", "false");
         cTF_5 = createCTabFolder(sashForm5, "5");
         cTF_5.setBackground(new Color(display, 102, 187, 106));
         cTF_5.addCTabFolder2Listener(new CTFAdapter(cTF_5));
@@ -426,6 +429,11 @@ public class EclipseLayout {
             int[] weights = s.getWeights();
             int i = getIndex(min);
 
+
+            if (min instanceof SashForm) {
+                min.setData("isMin", "true");
+            }
+
             for (int j = i + 1; j < weights.length; j++) {
                 if (weights[j] != 0) {
                     weights[j] += weights[i];
@@ -457,7 +465,8 @@ public class EclipseLayout {
                 if (!s.getParent().equals(middleCpst)) {
                     setMin(s);
                 } else {
-                    s.setLayoutData(new GridData(0, 0));
+                    sashForm1.setVisible(false);
+                    sf1GridData.exclude = true;
                     middleCpst.layout();
                 }
             }
@@ -610,12 +619,23 @@ public class EclipseLayout {
 
     private void restoreMin(Control c) {
         SashForm s = (SashForm) c.getParent();
-        for (int weight : s.getWeights()) {
-            System.out.println(weight);
-        }
         Control[] controls = s.getChildren();
         int[] weights = new int[0];
         int[] currentWeights = s.getWeights();
+
+        for (Control child : s.getChildren()) {
+            if (child instanceof CTabFolder) {
+                CTabFolder cTabFolder = (CTabFolder) child;
+                if (cTabFolder.getMinimized() && currentWeights[getIndex(cTabFolder)] != 0) {
+                    currentWeights[getIndex(cTabFolder)] = 0;
+                }
+            } else if (child instanceof SashForm) {
+                SashForm sashForm = (SashForm) child;
+                if (sashForm.getData("isMin") == "true" && currentWeights[getIndex(sashForm)] != 0) {
+                    currentWeights[getIndex(sashForm)] = 0;
+                }
+            }
+        }
 
         if (s.equals(sashForm1)) {
             weights = sf1Weight;
@@ -632,21 +652,39 @@ public class EclipseLayout {
         int weight = weights[index];
 
         for (Control control : controls) {
-            if (control instanceof CTabFolder || control instanceof SashForm) {
-                int i = getIndex(control);
-                int w = currentWeights[i];
-                if (!control.equals(c) && w == 0) {
-                    weight += weights[i];
-                } else if (w != 0) {
-                    currentWeights[i] = weights[i];
+            int i = getIndex(control);
+            if (control instanceof CTabFolder) {
+                CTabFolder cTabFolder = (CTabFolder) control;
+                if (!control.equals(c)) {
+                    if (cTabFolder.getMinimized()) {
+                        weight += weights[i];
+                    } else {
+                        currentWeights[i] = weights[i];
+                    }
+
+                }
+            } else if (control instanceof SashForm) {
+                SashForm sashForm = (SashForm) control;
+                if (!control.equals(c)) {
+                    if (sashForm.getData("isMin") == "true") {
+                        weight += weights[i];
+                    } else {
+                        currentWeights[i] = weights[i];
+                    }
                 }
             }
         }
+
         currentWeights[index] = weight;
         s.setWeights(currentWeights);
 
-//        if (!s.getParent().equals(middleCpst)) {
-//            restoreMin(s);
-//        }
+        if (!s.getParent().equals(middleCpst)) {
+            s.setData("isMin", "false");
+            restoreMin(s);
+        } else if (!sashForm1.getVisible()) {
+            sashForm1.setVisible(true);
+            sf1GridData.exclude = false;
+            middleCpst.layout();
+        }
     }
 }
