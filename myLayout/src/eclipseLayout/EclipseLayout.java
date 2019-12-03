@@ -2,6 +2,8 @@ package eclipseLayout;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.*;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -14,6 +16,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 
+/**
+ *侧边栏没有标签页时隐藏&点击按钮恢复标签页
+ * 点击按钮存在bug，缩小一个恢复一个，多了就有问题了
+ */
 public class EclipseLayout {
     private Shell shell;
     private Display display;
@@ -254,6 +260,7 @@ public class EclipseLayout {
         cTF_1 = createCTabFolder(sashForm2, "1");
         cTF_1.setBackground(new Color(display, 239, 83, 80));
         cTF_1.addCTabFolder2Listener(new CTFAdapter(cTF_1));
+//        cTF_1.addControlListener(new resizeListener());
         cTF_2 = createCTabFolder(sashForm2, "2");
         cTF_2.setBackground(new Color(display, 66, 165, 245));
         cTF_2.addCTabFolder2Listener(new CTFAdapter(cTF_2));
@@ -396,28 +403,6 @@ public class EclipseLayout {
         }
 
         /**
-         * 获取child在parent的序号
-         *
-         * @param child 要获取序号的child
-         * @return child的序号
-         */
-        private int getIndex(Control child) {
-            Composite c = child.getParent();
-
-            int index = 0;
-            Control[] control = c.getChildren();
-
-            for (Control control1 : control) {
-                if (control1.equals(child)) {
-                    break;
-                }
-                index++;
-            }
-
-            return index;
-        }
-
-        /**
          * 将标签页最大化：这里传入控件的parent必须是SashForm
          *
          * @param max 最大化的标签页
@@ -440,6 +425,7 @@ public class EclipseLayout {
             SashForm s = (SashForm) min.getParent();
             int[] weights = s.getWeights();
             int i = getIndex(min);
+
             for (int j = i + 1; j < weights.length; j++) {
                 if (weights[j] != 0) {
                     weights[j] += weights[i];
@@ -464,6 +450,8 @@ public class EclipseLayout {
             }
 
             if (!isAllMin) {
+//                setWeights(int[] weights)：weights长度必须同sashform的非sash的children，且和为100
+//                因此这里全部最小化后的元素全为0的weights数组不能传给setWeights（），此时sashForm的weights属性为0,...,100
                 s.setWeights(weights);
             } else {
                 if (!s.getParent().equals(middleCpst)) {
@@ -493,14 +481,18 @@ public class EclipseLayout {
         @Override
         public void widgetSelected(SelectionEvent e) {
             ToolItem t = (ToolItem) e.widget;
+            ToolBar parent = t.getParent();
+            boolean isLeft = false;
             CTabFolder c = null;
 
             switch ((String) t.getData("name")) {
                 case "1":
                     c = cTF_1;
+                    isLeft = true;
                     break;
                 case "2":
                     c = cTF_2;
+                    isLeft = true;
                     break;
                 case "3":
                     c = cTF_3;
@@ -520,9 +512,35 @@ public class EclipseLayout {
                 default:
                     break;
             }
+
+//            不能用t.getParent().getChildren().length==0，ToolItem不算ToolBar的children（control类型）
+//            ToolItem还未dispose，因此剩余1
+            if (parent.getItemCount() == 1) {
+                if (isLeft) {
+                    lToolBar.setVisible(false);
+                    lGridData.exclude = true;
+                } else {
+                    rToolBar.setVisible(false);
+                    rGridData.exclude = true;
+                }
+                contentCpst.layout();
+            }
+
             c.setMinimized(false);
             c.setMaximized(false);
+            restoreMin(c);
             t.dispose();
+        }
+    }
+
+    class resizeListener extends ControlAdapter {
+        @Override
+        public void controlResized(ControlEvent e) {
+            sf1Weight = sashForm1.getWeights();
+            sf2Weight = sashForm2.getWeights();
+            sf3Weight = sashForm3.getWeights();
+            sf4Weight = sashForm4.getWeights();
+            sf5Weight = sashForm5.getWeights();
         }
     }
 
@@ -566,5 +584,69 @@ public class EclipseLayout {
         }
 
         return drawImage(new Color(display, rgb));
+    }
+
+    /**
+     * 获取child在parent的序号
+     *
+     * @param child 要获取序号的child
+     * @return child的序号
+     */
+    private int getIndex(Control child) {
+        Composite c = child.getParent();
+
+        int index = 0;
+        Control[] control = c.getChildren();
+
+        for (Control control1 : control) {
+            if (control1.equals(child)) {
+                break;
+            }
+            index++;
+        }
+
+        return index;
+    }
+
+    private void restoreMin(Control c) {
+        SashForm s = (SashForm) c.getParent();
+        for (int weight : s.getWeights()) {
+            System.out.println(weight);
+        }
+        Control[] controls = s.getChildren();
+        int[] weights = new int[0];
+        int[] currentWeights = s.getWeights();
+
+        if (s.equals(sashForm1)) {
+            weights = sf1Weight;
+        } else if (s.equals(sashForm2)) {
+            weights = sf2Weight;
+        } else if (s.equals(sashForm3)) {
+            weights = sf3Weight;
+        } else if (s.equals(sashForm4)) {
+            weights = sf4Weight;
+        } else if (s.equals(sashForm5)) {
+            weights = sf5Weight;
+        }
+        int index = getIndex(c);
+        int weight = weights[index];
+
+        for (Control control : controls) {
+            if (control instanceof CTabFolder || control instanceof SashForm) {
+                int i = getIndex(control);
+                int w = currentWeights[i];
+                if (!control.equals(c) && w == 0) {
+                    weight += weights[i];
+                } else if (w != 0) {
+                    currentWeights[i] = weights[i];
+                }
+            }
+        }
+        currentWeights[index] = weight;
+        s.setWeights(currentWeights);
+
+//        if (!s.getParent().equals(middleCpst)) {
+//            restoreMin(s);
+//        }
     }
 }
