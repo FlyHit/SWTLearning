@@ -9,6 +9,7 @@
       <module fileurl="file://$PROJECT_DIR$/myFirstSWT/myFirstSWT.iml" filepath="$PROJECT_DIR$/myFirstSWT/myFirstSWT.iml" />
       <module fileurl="file://$PROJECT_DIR$/myLayout/myLayout.iml" filepath="$PROJECT_DIR$/myLayout/myLayout.iml" />
       <module fileurl="file://$PROJECT_DIR$/test/test.iml" filepath="$PROJECT_DIR$/test/test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/thread/thread.iml" filepath="$PROJECT_DIR$/thread/thread.iml" />
     </modules>
   </component>
 </project>
