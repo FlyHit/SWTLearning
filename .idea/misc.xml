@@ -2,7 +2,7 @@
 <project version="4">
   <component name="Osmorc">
     <option name="bundlesOutputPath" value="$PROJECT_DIR$/out/bundles" />
-    <option name="frameworkInstanceName" value="Equinox" />
+    <option name="frameworkInstanceName" value="Equinox (3.13.100.v20180827-1536)" />
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" project-jdk-name="1.8 (5)" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
